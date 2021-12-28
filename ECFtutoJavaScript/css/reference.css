@@ -1,0 +1,334 @@
+.main{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-attachment: fixed;
+}
+
+.section-1, .section-2{
+    font-size: max(0.8vw, 10px);
+    letter-spacing: 0.5px;
+    line-height: max(1.6vw, 20px);
+    width: max(60vw, 320px);
+    padding: 2vw 2vw;
+    margin: 0vw 0vw 20vw;
+    border-radius: 30px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 8px 8px 15px 0px rgba(0, 0, 0, 0.878), inset 2px 2px 30px 10px rgb(175, 175, 175);
+    border: 3px solid #f7cf1edb;
+}
+
+#h1{
+    font-family: 'Lobster-Regular', Arial, sans-serif;
+    font-size: max(1.6vw, 13px);
+    margin: 5vw 0 3vw;
+    background-color: rgb(0, 0, 0);
+    color: #f7cf1e;
+    border: 8px double #f7cf1edb;
+    box-shadow: 6px 6px 15px 0px #211b00, inset 100px 10px 60px 0px #3c3100;
+    text-shadow: 2px 2px 0px #382e00;
+    border-radius: 50%;
+    width: max(22vw, 220px);
+    padding-top: max(2.3vw, 20px);
+    padding-bottom: max(2.3vw, 20px);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+#h1-section{
+    font-family: 'LobsterTwo-Regular', Arial, sans-serif;
+    font-size: max(1.9vw, 15px);
+    padding: 0.8vw 0;
+    text-align: center;
+    margin: 40px 0 10px;
+    border-top: 8px double black;
+    border-bottom: 8px double black;
+    color: black;
+    background-color: #f7cf1edb;
+    letter-spacing: 1px;
+}
+
+.ref-title{
+    align-items: flex-start;
+    margin: 50px 0 0px;
+    text-align: center;
+}
+
+h2{
+    font-size: max(1.3vw, 13px);
+    background-color: #f7cf1edb;
+    color: black;
+    border: 5px double black;
+    border-radius: 10px;
+    padding: 0.6vw 0.8vw;
+}
+
+.vert-ita{
+    font-size: max(0.9vw, 9px);
+    color: rgb(0, 196, 0);
+    font-style: italic;
+}
+
+
+h3{
+    font-size: max(1.1vw, 12px);
+    margin: 50px 0 10px;
+    text-decoration: underline;
+}
+
+h4{
+    font-size: max(0.9vw, 9px);
+    margin: 15px 0 0px;
+}
+
+p{
+    font-family: 'Poppins-Medium', helvetica, sans-serif;
+}
+
+.ex-code {
+    display: block;
+    font-family: 'Poppins-Light', helvetica, sans-serif;
+    color: rgb(88, 255, 5);
+    font-size: max(0.8vw, 9px);
+    background-color: black;
+    padding: 2vw;
+    border-radius: 5px;
+    margin: 0vw 0 1vw;
+    line-height: 25px;
+}
+
+.vert{
+    color: rgb(0, 196, 0);
+}
+
+.orange{
+    color: rgb(255, 145, 0);
+}
+
+.fond-resultat{
+    border: 1px solid #f7cf1edb;
+    border-left: 8px solid #f7cf1edb;
+    background-color: #f7cf1e3f;
+    width: max(30vw, 295px);
+    padding: 1vw;
+    margin: 0vw 0 1vw;
+}
+
+/*____________________MENU BURGER____________________*/
+
+/* BOUTON */
+
+.btn {
+    background: transparent;
+    position: fixed;
+    top: 3px;
+    left: -55px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    z-index: 2;
+}
+
+.spin-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: relative;
+    transition: transform 0.9s ease-in-out;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+}
+
+.spin-container.active {
+    transform: rotateY(180deg);
+}
+
+.front, .back {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    backface-visibility: hidden;
+    perspective: 1500px;
+    transform-style: preserve-3d;
+}
+
+.front {
+    background-color: black;
+}
+
+.back {
+    background-color: rgb(225, 29, 29);
+    transform: rotateY(180deg);
+}
+
+.bar {
+    width: 60%;
+    height: 2px;
+    background: rgb(255, 255, 255);
+    border-radius: 10px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+.b1 {
+    transform: translate(-50%, -8px) translateZ(20px);
+}
+
+.b2 {
+    transform: translate(-50%, -1px) translateZ(20px);
+}
+
+.b3 {
+    transform: translate(-50%, 6px) translateZ(20px);
+}
+
+.b1.b-back {
+    transform: translate(-50%, -1px) translateZ(20px) rotate(45deg);
+}
+
+.b3.b-back {
+    transform: translate(-50%, -1px) translateZ(20px) rotate(-45deg);
+}
+
+/* FIN BOUTON */
+
+
+#block-nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: max(20vw, 270px);
+    background-color: #f7cf1e;;
+    border: 8px double black;
+    border-radius: 5px;
+    transform: translateX(100%);
+    /*fait passer le menu hors écran sur la droite*/
+    transition: transform 0.3s ease-in-out;
+    /* transition ouvert/fermé */
+    z-index: 1;
+}
+
+#block-nav.active {
+    transform: translateX(0);
+}
+
+#nav2 {
+    position: fixed;
+    min-height: 98vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    text-align: center;
+}
+
+.navul1b, .navul2b, .navul3b, .navul4b {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: max(1vw, 13px);
+    margin: 0;
+    width: max(19vw, 260px);
+    min-height: 20vh;
+    list-style-type: none;
+}
+
+#nav2 .li-title{
+    font-family: 'LobsterTwo-Regular', Arial, sans-serif;
+    font-size: max(1.1vw, 14px);
+    width: 95%;
+    border-top: 5px double #000000db;
+    border-bottom: 5px double #000000db;
+    padding: 5px 0;
+    margin: 10px 0 10px;
+    letter-spacing: 1px;
+}
+
+#nav2 li {
+    padding: 2px 0;
+}
+
+#nav2 a {
+    font-size: max(0.9vw, 12px);
+    font-family: 'Poppins-SemiBold', Arial, sans-serif;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    color: black;
+    transition: 0.3s;
+}
+
+#nav2 em {
+    font-family: 'Poppins-Medium', helvetica, sans-serif;
+    font-size: max(0.7vw, 10px);
+    letter-spacing: 0.5px;
+    transition: 0.3s;
+}
+
+#nav2 a:hover {
+    color: #ffffff;
+    letter-spacing: 2px;
+}
+
+#nav2 a:hover em {
+    color: #ffffff;
+    letter-spacing: 3px;
+}
+
+
+/*_XXXXXXXXXXXXXXXXXX_FIN MENU BURGER_XXXXXXXXXXXXXXXXXX_*/
+
+
+
+/*____________________MEDIAQUERIES____________________*/
+
+@media only screen and (min-width: 581px) and (max-width: 1100px) {
+    .section-1, .section-2, .section-3 {
+        width: max(50vw, 581px);
+    }
+}
+@media only screen and (min-width: 481px) and (max-width: 580px) {
+    .section-1, .section-2, .section-3 {
+        width: max(50vw, 481px);
+    }
+}
+@media only screen and (min-width: 390px) and (max-width: 480px) {
+    .section-1, .section-2, .section-3 {
+        width: max(50vw, 390px);
+    }
+}
+
+@media only screen and (orientation: landscape) and (max-height: 600px) {
+    #block-nav {
+        width: max(60vw, 540px);
+    }
+    #nav2 {
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 30px;
+    }
+    .navul1b, .navul2b, .navul3b, .navul4b {
+        line-height: max(0.8vw, 10px);
+        width: max(20vw, 230px);
+        min-height: 45vh;
+    }
+    #nav2 em {
+        font-size: max(0.6vw, 9px);
+    }
+    
+    #nav2 a {
+        font-size: max(0.8vw, 11px);
+    }
+}
+
+/*_XXXXXXXXXXXXXXXXXX_FIN MEDIAQUERIES_XXXXXXXXXXXXXXXXXX_*/
