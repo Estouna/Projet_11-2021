@@ -18,13 +18,13 @@
 
 
 .bienvenue {
-    font-size: max(2.5vw, 20px);
+    font-size: max(2.5vw, 18px);
     width: max(60vw, 300px);
     color: #f7cf1edb;
     letter-spacing: 3px;
     border-bottom: 6px double white;
     padding: 1vw;
-    margin-top: -5vw;
+    margin-top: max(1vw, 20px);
 }
 
 .block {
@@ -49,7 +49,7 @@
 }
 
 .p-pseudo, .p-email {
-    font-size: max(1.2vw, 19px);
+    font-size: max(1.2vw, 18px);
     color: #f7cf1edb;
     margin-bottom: 0.5vw;
 }
@@ -62,7 +62,7 @@
 }
 
 .a-edition, .a-deconnexion {
-    font-size: max(0.8vw, 12px);
+    font-size: max(0.8vw, 11px);
     text-shadow: 0.3px 0.3px 0.5px white;
     font-weight: bold;
     color: black;
@@ -71,7 +71,7 @@
     border-radius: 10px;
     text-decoration: none;
     padding: max(0.3vw, 5px);
-    width: max(9vw, 130px);
+    width: max(9vw, 110px);
     margin: 20px 0 20px;
     transition: 0.5s;
 }

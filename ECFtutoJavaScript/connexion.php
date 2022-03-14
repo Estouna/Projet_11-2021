@@ -1,32 +1,49 @@
-<!DOCTYPE html>
-<?php
+<?php 
+
 session_start();
 
-$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root', '');
+require('Db/database.php');
 
-if (isset($_POST['formConnexion'])) {
+if (isset($_POST['validate'])) {
     $mailConnect = htmlspecialchars($_POST['mailConnect']);
-    $mdpConnect = sha1($_POST['mdpConnect']);
-    if (!empty($mailConnect) and !empty($mdpConnect)) //Mettre d'autres options
+    $passwordConnect = ($_POST['passwordConnect']);
+    if (!empty($mailConnect) and !empty($passwordConnect)) 
     {
-        $requser = $bdd->prepare("SELECT * FROM membres WHERE mail = ? AND motDePasse = ?"); //requête sur l'utilisateur pour vérifier qu'il existe bien
-        $requser->execute(array($mailConnect, $mdpConnect)); //execute la requête avec des tableaux
-        $userexist = $requser->rowCount(); // "rowCount" = fonction qui permet de compter le nombre de colonnes (row = ligne/rangée count = compter)
+        $checkIfUserExists = $bdd->prepare("SELECT * FROM membres WHERE mail = ?"); //requête sur l'utilisateur pour vérifier qu'il existe bien
+        $checkIfUserExists->execute(array($mailConnect)); //execute la requête avec des tableaux
+        $userexist = $checkIfUserExists->rowCount(); // "rowCount" = fonction qui permet de compter le nombre de colonnes (row = ligne/rangée count = compter)
         if ($userexist == 1) //si l'utilisateur existe
         {
-            $userinfo = $requser->fetch(); // Recevoir les infos
-            $_SESSION['id'] = $userinfo['id'];
-            $_SESSION['pseudo'] = $userinfo['pseudo'];
-            $_SESSION['mail'] = $userinfo['mail'];
-            header("Location: profil.php?id=" . $_SESSION['id']); //Pour rediriger vers le profil de la personne
+            // Récupère les données de l'utilisateur
+            $usersInfos = $checkIfUserExists->fetch();
+            
+            // Vérifie si le mot de passe est correct
+            if (password_verify($passwordConnect, $usersInfos['pass'])) {
+
+                // Authentifie l'utilisateur sur le site et récupère ses données dans des variables globales session
+                $_SESSION['auth'] = true;
+                $_SESSION['id'] = $usersInfos['id'];
+                $_SESSION['pseudo'] = $usersInfos['pseudo'];
+                $_SESSION['mail'] = $usersInfos['mail'];
+
+                //Redirige vers le profil de la personne
+                header("Location: profil.php");
+                exit();
+
+            } else {
+                $erreur = "Votre mot de passe est incorrect";
+            }
         } else {
-            $erreur = "Mauvais mail ou mot de passe !";
+            $erreur = "Adresse mail ou mot de passe incorrect";
         }
     } else {
-        $erreur = "Tous les champs doivent être complétés !";
+        $erreur = "Veuillez compléter tous les champs";
     }
 }
+
 ?>
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -59,18 +76,8 @@ if (isset($_POST['formConnexion'])) {
             </nav>
         </div>
     </header>
+    
     <main class="mainConnexion column centerH centerV">
-        <!--<div class="blockForm column centerH centerV">
-            <h2>Connexion</h2>
-            <h3>Entrez vos identifiants</h3>
-            <br /><br />
-            <form class="formConnexion column centerH" method="POST" action="">
-                <input class="btn" type="email" name="mailConnect" placeholder="Email">
-                <input class="btn" type="password" name="mdpConnect" placeholder="Mot de passe">
-                <input class="btn" type="submit" name="formConnexion" value="Se connecter !">
-            </form>
-            <p>Pas encore de compte <a href="inscription.php">s'inscrire</a></p>
-        </div>-->
 
         <form action="" method="POST" class="formConnexion row centerH centerV">
 
@@ -86,11 +93,11 @@ if (isset($_POST['formConnexion'])) {
                             <input type="email" name="mailConnect" placeholder="Email">
                         </div>
                         <div class="column">
-                            <label for="mdpConnect">Mot de passe :</label>
-                            <input type="password" name="mdpConnect" placeholder="Mot de passe">
+                            <label for="passwordConnect">Mot de passe :</label>
+                            <input type="password" name="passwordConnect" placeholder="Mot de passe">
                         </div>
                         <div class="row centerH">
-                            <input id="seConnecter" type="submit" name="formConnexion" value="Se connecter">
+                            <input id="seConnecter" type="submit" name="validate" value="Se connecter">
                         </div>
                         <p class="p-pasEncore">Pas encore de compte <a class="sInscrire" href="inscription.php">s'inscrire</a></p>
                     </div>
@@ -106,6 +113,7 @@ if (isset($_POST['formConnexion'])) {
         if (isset($valide)) {
             echo '<span class="green">' . $valide . "</span>";
         }
+
         ?>
     </main>
 

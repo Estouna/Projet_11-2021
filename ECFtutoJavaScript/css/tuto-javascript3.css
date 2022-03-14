@@ -150,8 +150,8 @@
 .btn {
     background: transparent;
     position: fixed;
-    top: 3px;
-    left: -48px;
+    top: 8px;
+    left: -50px;
     border: none;
     cursor: pointer;
     transition: transform 0.3s ease-in-out;

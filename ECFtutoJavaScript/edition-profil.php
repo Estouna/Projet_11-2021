@@ -1,68 +1,102 @@
-<!DOCTYPE html>
 <?php
+
 session_start();
 
-$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root', '');
+require('Db/database.php');
 
-if (isset($_SESSION['id']))
-//test pour voir si la personne est connectée
-{
-    $requser = $bdd->prepare('SELECT * FROM membres WHERE id = ?'); //requête sur l'utilisateur pour son id
-    $requser->execute(array($_SESSION['id'])); //execute avec $_SESSION['id']
-    $user = $requser->fetch(); //affichage des données en allant les chercher
+// Vérifie que l'id de session existe, que l'utilisateur est connecté.
+if (isset($_SESSION['id'])) {
+    $requser = $bdd->prepare('SELECT * FROM membres WHERE id = ?');
+    $requser->execute(array($_SESSION['id']));
+    $user = $requser->fetch();
 
-    if (isset($_POST['newpseudo']) and !empty($_POST['newpseudo']) and $_POST['newpseudo'] != $user['pseudo'])
-    //vérifie le pseudo, s'il n'est pas vide et si newpseudo est différent de pseudo
-    {
+    // Vérifie le pseudo, s'il n'est pas vide et si newpseudo est différent de pseudo
+
+    if (isset($_POST['newpseudo']) and !empty($_POST['newpseudo']) and $_POST['newpseudo'] != $user['pseudo']) {
+        
+        //sécurise la variable avec htmlspecialchars (injection de code)
         $newpseudo = htmlspecialchars($_POST['newpseudo']);
-        //sécurise la variable avec htmlspecialchars (injection de code)
-        $insertpseudo = $bdd->prepare("UPDATE membres SET pseudo = ? WHERE id = ?");
-        //requête sql pour update membres pseudo (WHERE id est très important sinon cela mettrait à jour tous les pseudos de la table membres)
-        $insertpseudo->execute(array($newpseudo, $_SESSION['id']));
-        //envoi des nouveaux paramètres
-        header('Location: profil.php?id=' . $_SESSION['id']);
+        // Vérifie le nombre de caractères
+        $newPseudolength = strlen($newpseudo);
+        if ($newPseudolength <= 30) {
+            // Vérifie que le pseudo n'existe pas déjà dans la base de données
+            $checkIfUserAlreadyExists = $bdd->prepare('SELECT pseudo FROM membres WHERE pseudo = ?');
+            $checkIfUserAlreadyExists->execute(array($newpseudo));
+            if ($checkIfUserAlreadyExists->rowCount() == 0) {
+
+                //requête pour update membres pseudo (WHERE id est très important sinon cela mettrait à jour tous les pseudos de la table membres)
+                $insertpseudo = $bdd->prepare("UPDATE membres SET pseudo = ? WHERE id = ?");
+                //envoi des nouveaux paramètres
+                $insertpseudo->execute(array($newpseudo, $_SESSION['id']));
+                //Redirige l'utilisateur vers la page profil en utilisant son id de session
+                header('Location: profil.php');
+                exit();
+
+            } else {
+                $msg = "Ce pseudo existe déjà.";
+            }
+        } else {
+            $msg = "Votre pseudo ne doit pas dépasser 30 caractères.";
+        }
     }
 
-    if (isset($_POST['newmail']) and !empty($_POST['newmail']) and $_POST['newmail'] != $user['mail'] and filter_var($newmail, FILTER_VALIDATE_EMAIL))
-    //vérifie le mail, s'il n'est pas vide et si newmail est différent de mail
-    {
+    // Vérifie si le nouveau mail existe, s'il n'est pas vide et s'il est différent de l'ancien
+    if (isset($_POST['newmail']) and !empty($_POST['newmail']) and $_POST['newmail'] != $user['mail']) {
+        //sécurise la variable avec htmlspecialchars (injection de code)
         $newmail = htmlspecialchars($_POST['newmail']);
-        //sécurise la variable avec htmlspecialchars (injection de code)
-        $insertmail = $bdd->prepare("UPDATE membres SET mail = ? WHERE id = ?");
-        //requête sql pour update membres mail (WHERE id est très important sinon cela mettrait à jour tous les mails de la table membres)
-        $insertmail->execute(array($newmail, $_SESSION['id']));
-        //envoi des nouveaux paramètres
-        header('Location: profil.php?id=' . $_SESSION['id']);
+        //Fonction qui vérifie que l'adresse mail est valide (quelqu'un qui s'y connait en HTML peut modifier le type email en type texte en inspectant le code)
+        if (filter_var($newmail, FILTER_VALIDATE_EMAIL)) {
+
+            // Vérifie que le mail n'existe pas déjà dans la base de données
+            $reqNewmail = $bdd->prepare("SELECT * FROM membres WHERE mail = ?");
+            $reqNewmail->execute(array($newmail));
+            $newmailExist = $reqNewmail->rowCount();
+            // Si mail == 0 dans la base de données
+            if ($newmailExist === 0) {
+
+                //requête pour update membres mail (WHERE id est très important sinon cela mettrait à jour tous les mails de la table membres)
+                $insertmail = $bdd->prepare("UPDATE membres SET mail = ? WHERE id = ?");
+                //envoi des nouveaux paramètres
+                $insertmail->execute(array($newmail, $_SESSION['id']));
+                //Redirige l'utilisateur vers la page profil en utilisant son id de session
+
+                header('Location: profil.php');
+                exit();
+                
+            } else {
+                $msg = "Adresse mail déjà utilisée.";
+            }
+        } else {
+            $msg = "Votre adresse mail n'est pas valide.";
+        }
     }
 
-    if (isset($_POST['newmdp1']) and !empty($_POST['newmdp1']) and isset($_POST['newmdp2']) and !empty($_POST['newmdp2']))
-    //vérifie le mdp1, s'il n'est pas vide et si newmdp1 est différent de mdp1
-    {
-        $mdp1 = sha1($_POST['newmdp1']);
-        $mdp2 = sha1($_POST['newmdp2']);
+    // Vérifie le nouveau mdp existe, s'il n'est pas vide et s'il est différent de l'ancien
+    if (isset($_POST['newmdp1']) and !empty($_POST['newmdp1']) and isset($_POST['newmdp2']) and !empty($_POST['newmdp2'])) {
+        $mdp1 = $_POST['newmdp1'];
+        $mdp2 = $_POST['newmdp2'];
 
         if ($mdp1 == $mdp2) {
-            $insertmdp = $bdd->prepare("UPDATE membres SET motDePasse = ? WHERE id = ?");
+
+            $mdp1 = password_hash($_POST['newmdp1'], PASSWORD_DEFAULT);
+            $insertmdp = $bdd->prepare("UPDATE membres SET pass = ? WHERE id = ?");
             //requête sql pour update membres mot de passe (WHERE id est très important sinon cela mettrait à jour tous les mdp de la table membres)
             $insertmdp->execute(array($mdp1, $_SESSION['id']));
             //mdp1 ou mdp2 ça revient au même
-            header('Location: profil.php?id=' . $_SESSION['id']);
+            header('Location: profil.php');
+            exit();
         } else {
             $msg = "Vos deux mots de passe ne correspondent pas";
         }
     }
 
-    if (isset($_POST['newpseudo']) and $_POST['newpseudo'] == $user['pseudo'] and isset($_POST['newmdp1']) and empty($_POST['newmdp1']) and isset($_POST['newmdp2']) and empty($_POST['newmdp2'])) {
-        header('Location: profil.php?id=' . $_SESSION['id']);
+    if (isset($_POST['newpseudo']) and $_POST['newpseudo'] == $user['pseudo'] and $_POST['newmail'] == $user['mail'] and isset($_POST['newmdp1']) and empty($_POST['newmdp1']) and isset($_POST['newmdp2']) and empty($_POST['newmdp2'])) {
+         $msg = "Vous devez modifier un champ avant de cliquer";
     }
-    /* 
-    - Ajouter un filter_var du mail pour vérifier si le mail est valide (modèle page inscription)
-    - Faire une requête pour voir si le newmail est bien une adresse valide et s'il n'existe pas dans la bdd pour ne pas avoir de doublons 
-      (modèle page inscription $reqmail prepare execute et $mailexist)
-    - Peut être créer la même chose pour le pseudo
-    - Pour le pseudo mettre la limite de caractère 255 
-    */
+
 ?>
+
+    <!DOCTYPE html>
     <html lang="fr">
 
     <head>
@@ -92,7 +126,7 @@ if (isset($_SESSION['id']))
                             <a href="reference.php"><span class="span-a1">G</span><span class="span-a1">L</span><span class="span-a1">O</span><span class="span-a1">S</span><span class="span-a1">S</span><span class="span-a1">A</span><span class="span-a1">I</span><span class="span-a1">R</span><span class="span-a1">E</span></a>
                         </li>
                         <li>
-                            <a href="deconnexion.php"><span class="span-a1">D</span><span class="span-a1">E</span><span class="span-a1">C</span><span class="span-a1">O</span><span class="span-a1">N</span><span class="span-a1">N</span><span class="span-a1">E</span><span class="span-a1">X</span><span class="span-a1">I</span><span class="span-a1">O</span><span class="span-a1">N</span></a>
+                        <a class="span-a1" href="profil.php"><?= $_SESSION['pseudo'] ?></a>
                         </li>
                     </ul>
                 </nav>
@@ -112,18 +146,18 @@ if (isset($_SESSION['id']))
 
                         <div class="column centerH centerV">
                             <div class="column">
-                                <label for="newpseudo">Nom d'utilisateur :</label>
+                                <label for="newpseudo">Changer votre pseudo :</label>
                                 <input type="text" name="newpseudo" id="newpseudo" placeholder="Pseudo" value="<?php echo $user['pseudo']; ?>" />
                             </div>
 
                             <div class="column">
-                                <label for="newmail">Email :</label>
+                                <label for="newmail">Changer votre adresse email :</label>
                                 <input type="email" name="newmail" id="newmail" placeholder="Email" value="<?php echo $user['mail']; ?>" />
                             </div>
 
 
                             <div class="column">
-                                <label for="newmdp1">Mot de passe :</label>
+                                <label for="newmdp1">Changer votre mot de passe :</label>
                                 <input type="password" name="newmdp1" id="newmdp1" placeholder="Mot de passe" />
                             </div>
 
@@ -134,25 +168,28 @@ if (isset($_SESSION['id']))
                             </div>
                         </div>
 
-                        <div class="row centerH">
+                        <div class="column centerH centerV">
                             <input id="formMaj" name="formMaj" type="submit" value="Mettre à jour mon profil" />
+                            <a class="a-editProfil-retour" href="profil.php">Retour</a>
                         </div>
 
+                        <?php
+                        if (isset($msg)) {
+                            echo '<div class="block-mess row centerH centerV"><span class="red">' . $msg . "</span></div>";
+                        }
+                        ?>
                     </div>
                 </div>
+
             </form>
-            <?php
-            if (isset($msg)) {
-                echo '<div class="block-mess row centerH centerV"><span class="red">' . $msg . "</span></div>";
-            }
-            ?>
+
         </main>
     </body>
-
-    </html>
 <?php
 } else {
     header("Location: connexion.php");
     //redirige la personne si elle n'est pas connbectée vers la page connexion
 }
 ?>
+
+    </html>

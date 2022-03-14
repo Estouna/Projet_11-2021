@@ -1,17 +1,15 @@
-<!DOCTYPE html>
 <?php
+
 session_start();
 
-$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root', '');
+require('Db/database.php');
 
-if (isset($_GET['id']) and $_GET['id'] > 0)
-//si la variable est superieur à 0 puisque on a pas d'id 0
-{
-    $getid = intval($_GET['id']); //sécurise la variable, si l'utilisateur entre dans l'url du texte, il sera converti en intval c'est à dire en nombre
-    $requser = $bdd->prepare('SELECT * FROM membres WHERE id = ?'); //requête sur l'utilisateur pour son id
-    $requser->execute(array($getid)); //execute avec $getid 
-    $userinfo = $requser->fetch(); //affichage des données en allant les chercher
+if (isset($_SESSION['id'])) {
+    $requser = $bdd->prepare('SELECT * FROM membres WHERE id = ?');
+    $requser->execute(array($_SESSION['id']));
+    $userinfo = $requser->fetch();
 ?>
+    <!DOCTYPE html>
     <html lang="fr">
 
     <head>
@@ -48,21 +46,23 @@ if (isset($_GET['id']) and $_GET['id'] > 0)
             </div>
         </header>
 
-        <main class="mainProfil row centerH centerV">
-            <div class="block-container column centerH centerV">
+        <main class="mainProfil row centerH">
+            <div class="block-container column centerV">
                 <div class="bienvenue row centerV centerH">
                     <h2>Bienvenue <?php echo $userinfo['pseudo']; ?></h2>
                 </div>
                 <div class="block row centerV">
                     <div class="pseuMail column centerV centerH">
+
                         <div class="pseudo column centerV centerH">
-                            <p class="p-pseudo">Mon pseudo : </p>
+                            <p class="p-pseudo">Mon pseudo : <br /></p>
                             <?php echo $userinfo['pseudo']; ?>
                         </div>
                         <div class="email column centerV centerH">
-                            <p class="p-email">Mon email : </p><br />
+                            <p class="p-email">Mon email : <br /></p>
                             <?php echo $userinfo['mail']; ?>
                         </div>
+
                     </div>
 
                     <?php
@@ -72,10 +72,11 @@ if (isset($_GET['id']) and $_GET['id'] > 0)
                             <a class="a-edition row centerH centerV" href="edition-profil.php">Editer mon profil</a>
                             <a class="a-deconnexion row centerH centerV" href="deconnexion.php">Se déconnecter</a>
                         </div>
-                </div>
-            <?php
+                    <?php
                     }
-            ?>
+                    ?>
+
+                </div>
             </div>
         </main>
 

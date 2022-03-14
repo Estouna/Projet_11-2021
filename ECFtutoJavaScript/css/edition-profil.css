@@ -80,4 +80,12 @@ input:focus {
     padding: 5px;
     border-radius: 10px;
     font-weight: bold;
+    margin-top: max(1vw, 10px);
+}
+
+.a-editProfil-retour{
+    font-size: max(0.9vw, 12px);
+    color: #f7cf1edb;
+    text-decoration: none;
+    margin-top: max(0.5vw, 5px);
 }

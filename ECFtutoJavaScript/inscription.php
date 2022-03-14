@@ -1,84 +1,82 @@
-<!DOCTYPE html>
-
 <?php
-//https://www.youtube.com/watch?v=s7qtAnH5YkY Tuto inscription
-$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root', '');
 
-if (isset($_POST['formInscription'])) {
-    $pseudo = htmlspecialchars($_POST['pseudo']);
-    $mail = htmlspecialchars($_POST['mail']);
-    $mail2 = htmlspecialchars($_POST['mail2']);
-    //htmlspecialchars = fonction qui permet d'enlever tous les caractères HTML pour pouvoir éviter des injections de codes.
-    $mdp = sha1($_POST['mdp']);
-    $mdp2 = sha1($_POST['mdp2']);
-    /*
-    $mdp = password_hash($_POST['mdp'], PASSWORD_DEFAULT);
-    $mdp2 = password_hash($_POST['mdp2'], PASSWORD_DEFAULT);
-    */
-    //https://www.youtube.com/watch?v=wyC5wVeFQNk pour explication hachage mdp
+session_start();
 
-    if (!empty($_POST['pseudo']) and !empty($_POST['mail']) and !empty($_POST['mail2']) and !empty($_POST['mdp']) and !empty($_POST['mdp2']))
+require('Db/database.php');
+
+if (isset($_POST['validate'])) {
+    $user_pseudo = htmlspecialchars($_POST['pseudo']);
+    $user_email = htmlspecialchars($_POST['mail']);
+    $user_email2 = htmlspecialchars($_POST['mail2']);
+    $user_password = ($_POST['password']);
+    $user_password2 = ($_POST['password2']);
+
+    if (!empty($_POST['pseudo']) and !empty($_POST['mail']) and !empty($_POST['mail2']) and !empty($_POST['password']) and !empty($_POST['password2']))
     //Si les champs sont remplis (!empty)
     {
-        $pseudolength = strlen($pseudo);
-        if ($pseudolength <= 255)
+        $pseudolength = strlen($user_pseudo);
+        if ($pseudolength <= 30)
         //Vérifie le nombre de caractères
         {
-            if ($mail == $mail2)
-            //confirmation mail
-            {
-                if (filter_var($mail, FILTER_VALIDATE_EMAIL))
-                //Fonction qui vérifie que l'adresse mail est valide (quelqu'un qui s'y connait en HTML peut modifier le type email en type texte)
+            $checkIfUserAlreadyExists = $bdd->prepare('SELECT pseudo FROM membres WHERE pseudo = ?');
+            $checkIfUserAlreadyExists->execute(array($user_pseudo));
+            if ($checkIfUserAlreadyExists->rowCount() == 0) {
+                if ($user_email == $user_email2)
+                //confirmation mail
                 {
-                    $reqmail = $bdd->prepare("SELECT * FROM membres WHERE mail = ?");
-                    $reqmail->execute(array($mail));
-                    $mailExist = $reqmail->rowCount();
-                    if ($mailExist == 0) {
-                        //vérifie si l'adresse mail n'existe pas déjà dans la bdd. On peut faire la même chose pour le pseudo
-                        if ($mdp == $mdp2)
-                        //confirmation mdp
-                        {
-                            $insertmbr = $bdd->prepare("INSERT INTO membres(pseudo, mail, motDePasse) VALUES(?, ? ,?)");
-                            $insertmbr->execute(array($pseudo, $mail, $mdp));
-                            $valide = "Votre compte a bien été créé ! <a class=\"meConnecter\" href=\"connexion.php\"> Me connecter</a>";
-                            //fonction pour inscrire l'utilisateur.
-                            /*
-                            header('Location: tuto-javascript3.php');
-                            */
-                            //renvoi vers la page d'accueil
+                    if (filter_var($user_email, FILTER_VALIDATE_EMAIL))
+                    //Fonction qui vérifie que l'adresse mail est valide (quelqu'un qui s'y connait en HTML peut modifier le type email en type texte)
+                    {
+                        $reqmail = $bdd->prepare("SELECT * FROM membres WHERE mail = ?");
+                        $reqmail->execute(array($user_email));
+                        $mailExist = $reqmail->rowCount();
+                        if ($mailExist == 0) {
+                            //vérifie si l'adresse mail n'existe pas déjà dans la bdd. On peut faire la même chose pour le pseudo
+
+                            if ($user_password == $user_password2)  {
+
+                                $user_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+                                $insertmbr = $bdd->prepare("INSERT INTO membres(pseudo, mail, pass) VALUES(?, ? ,?)");
+                                $insertmbr->execute(array($user_pseudo, $user_email, $user_password));
+                                $valide = "Votre compte a bien été créé ! <a class=\"meConnecter\" href=\"connexion.php\"> Me connecter</a>";
+                                
+                            } else {
+                                $erreur = "Vos mots de passes ne correspondent pas.";
+                            }
+
                         } else
-                        //confirmation mdp erreur 
+                        //Si le mail existe déjà erreur
                         {
-                            $erreur = "Vos mots de passes ne correspondent pas !";
+                            $erreur = "Adresse mail déjà utilisée.";
                         }
                     } else
-                    //Si le mail existe déjà erreur
+                    //adresse mail non valide
                     {
-                        $erreur = "Adresse mail déjà utilisée !";
+                        $erreur = "Votre adresse mail n'est pas valide.";
                     }
                 } else
-                //adresse mail non valide
+                //confirmation mail erreur 
                 {
-                    $erreur = "Votre adresse mail n'est pas valide' !";
+                    $erreur = "Vos adresses mail ne correspondent pas.";
                 }
-            } else
-            //confirmation mail erreur 
-            {
-                $erreur = "Vos adresses mail ne correspondent pas !";
+            } else {
+                //pseudo déjà existant
+                $erreur = "Ce pseudo existe déjà.";
             }
         } else
         //nombre de caractères erreur 
         {
-            $erreur = "Votre pseudo ne doit pas dépasser 255 caractères !";
+            $erreur = "Votre pseudo ne doit pas dépasser 30 caractères.";
         }
     } else
     //Si les champs ne sont pas remplis erreur 
     {
-        $erreur = "Tous les champs doivent être complétés !";
+        $erreur = "Tous les champs doivent être complétés.";
     }
 }
 
 ?>
+<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -115,7 +113,7 @@ if (isset($_POST['formInscription'])) {
 
     <main>
 
-        <form action="" method="POST" id="formInscription" class="row centerH centerV">
+        <form method="POST" id="formInscription" class="row centerH centerV">
 
             <div class="container column centerH centerV">
                 <div class="bloc-form column centerH">
@@ -127,39 +125,39 @@ if (isset($_POST['formInscription'])) {
                     <div class="column centerH centerV">
                         <div class="column">
                             <label for="pseudo">Nom d'utilisateur :</label>
-                            <input type="text" name="pseudo" id="pseudo" placeholder="Pseudo" value="<?php if (isset($pseudo)) {
-                                                                                                            echo $pseudo;
+                            <input type="text" name="pseudo" id="pseudo" placeholder="Pseudo" value="<?php if (isset($user_pseudo)) {
+                                                                                                            echo $user_pseudo;
                                                                                                         } ?>" />
                             <span id="errLogin" class="erreur"></span>
                         </div>
                         <div class="column">
                             <label for="mail">Email :</label>
-                            <input type="email" name="mail" id="mail" placeholder="pompom@gmail.com" value="<?php if (isset($mail)) {
-                                                                                                                echo $mail;
-                                                                                                            } ?>" />
+                            <input type="email" name="mail" id="mail" placeholder="laurent@gmail.com" value="<?php if (isset($user_email)) {
+                                                                                                                    echo $user_email;
+                                                                                                                } ?>" />
                             <span id="errMail" class="erreur"></span>
                         </div>
                         <div class="column">
                             <label for="mail2">Confirmation de l'email :</label>
-                            <input type="email" name="mail2" id="mail2" placeholder="pompom@gmail.com" value="<?php if (isset($mail2)) {
-                                                                                                                    echo $mail2;
+                            <input type="email" name="mail2" id="mail2" placeholder="laurent@gmail.com" value="<?php if (isset($user_email2)) {
+                                                                                                                    echo $user_email2;
                                                                                                                 } ?>" />
                             <span id="errMail2" class="erreur"></span>
                         </div>
                         <div class="column">
-                            <label for="mdp">Mot de passe :</label>
-                            <input type="password" name="mdp" id="mdp" placeholder="Mot de passe" />
+                            <label for="password">Mot de passe :</label>
+                            <input type="password" name="password" id="password" placeholder="Mot de passe" />
                             <span id="errMdp" class="erreur"></span>
                         </div>
                         <div class="column">
-                            <label for="mdp2">Confirmation du mot de passe :</label>
-                            <input type="password" name="mdp2" id="mdp2" placeholder="Confirmation du mot de passe" />
+                            <label for="password2">Confirmation du mot de passe :</label>
+                            <input type="password" name="password2" id="password2" placeholder="Confirmation du mot de passe" />
                             <span id="errMdp2" class="erreur"></span>
                         </div>
                     </div>
 
                     <div class="row centerH">
-                        <input id="envoyer" name="formInscription" type="submit" value="Envoyer" />
+                        <input id="envoyer" name="validate" type="submit" value="Envoyer" />
                     </div>
                 </div>
             </div>

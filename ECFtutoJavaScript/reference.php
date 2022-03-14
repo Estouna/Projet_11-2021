@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,9 +27,15 @@
                     <li>
                         <a href="reference.php"><span class="span-a1">G</span><span class="span-a1">L</span><span class="span-a1">O</span><span class="span-a1">S</span><span class="span-a1">S</span><span class="span-a1">A</span><span class="span-a1">I</span><span class="span-a1">R</span><span class="span-a1">E</span></a>
                     </li>
-                    <li>
-                        <a href="connexion.php"><span class="span-a1">C</span><span class="span-a1">O</span><span class="span-a1">N</span><span class="span-a1">N</span><span class="span-a1">E</span><span class="span-a1">X</span><span class="span-a1">I</span><span class="span-a1">O</span><span class="span-a1">N</span></a>
-                    </li>
+                    <?php if (isset($_SESSION['id'])) { ?>
+                        <li>
+                            <a class="span-a1" href="profil.php"><?= $_SESSION['pseudo'] ?></a>
+                        </li>
+                    <?php } else { ?>
+                        <li>
+                            <a href="connexion.php"><span class="span-a1">C</span><span class="span-a1">O</span><span class="span-a1">N</span><span class="span-a1">N</span><span class="span-a1">E</span><span class="span-a1">X</span><span class="span-a1">I</span><span class="span-a1">O</span><span class="span-a1">N</span></a>
+                        </li>
+                    <?php }  ?>
                 </ul>
             </nav>
         </div>
